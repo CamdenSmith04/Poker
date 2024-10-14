@@ -1,2 +1,2 @@
 # Poker
-Poker from scratch
+A Poker Project for Anish and Camden
