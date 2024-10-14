@@ -91,35 +91,20 @@ def new_round(playersLL, rules):
     # Next players turn - after big blind
     pTurn = inter.head.next
 
-    while (pTurn != inter.head):
+    checkBets(pTurn, inter, table)
+
+    # Allows big blind to bet if checked through
+    if table.round_bet == rules.blinds.big:
         x = checkBetFoldCall(pTurn, table)
-        if x == 9:
-            inter.remove(pTurn)
-            pTurn = pTurn.next
-        elif x == 7:
+        if x == 7:
             inter.head = pTurn
             pTurn = pTurn.next
-        elif x == 8:
-            pTurn = pTurn.next
+            checkBets(pTurn, inter,table)
         else:
             pTurn = pTurn.next
 
-    # Make function to let big blind bet if all call/check
-
     # Adds pot size and clears bets
-    pTurn = inter.head
-    table.pot.size += pTurn.data.current_bet
-    pTurn.data.current_bet = 0
-    pTurn = pTurn.next
-    while (pTurn != inter.head):
-        table.pot.size += pTurn.data.current_bet
-        pTurn.data.current_bet = 0
-        pTurn = pTurn.next
-    
-
-    if pTurn == pTurn.next:
-        pTurn.data.balance += pot.size
-        pot.size = 0
+    clearBets(pTurn, inter, table)
         # New Round functions
 
     inter.printLL()
@@ -127,6 +112,7 @@ def new_round(playersLL, rules):
     print(f"\nPot: ${table.pot.size}\n")
 
     flop(table, deck)
+    
     print(f"Flop: {table.cards}")
 
     # For turn
@@ -174,6 +160,37 @@ def new_round(playersLL, rules):
     return rotatedLL
     # For river
 
+def checkBets(p1Turn, inter, table):
+    while (p1Turn != inter.head):
+        x = checkBetFoldCall(p1Turn, table)
+        if x == 9:
+            inter.remove(p1Turn)
+            p1Turn = p1Turn.next
+        elif x == 7:
+            inter.head = p1Turn
+            p1Turn = p1Turn.next
+        elif x == 8:
+            p1Turn = p1Turn.next
+        else:
+            p1Turn = p1Turn.next
+    return
+
+def clearBets(pTurn, inter, table):
+    pTurn = inter.head
+    table.pot.size += pTurn.data.current_bet
+    pTurn.data.current_bet = 0
+    pTurn = pTurn.next
+    while (pTurn != inter.head):
+        table.pot.size += pTurn.data.current_bet
+        pTurn.data.current_bet = 0
+        pTurn = pTurn.next
+    return
+    
+
+    if pTurn == pTurn.next:
+        pTurn.data.balance += pot.size
+        pot.size = 0
+
 def checkBetFoldCall(player, table):
 
     bool = False
@@ -198,7 +215,7 @@ def checkBetFoldCall(player, table):
                     else:
                         player.data.balance -= bet_amount
                         player.data.current_bet += bet_amount
-                        table.round_bet = bet_amount
+                        table.round_bet = player.data.current_bet
                         
                         return 7
                     
