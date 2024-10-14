@@ -26,7 +26,6 @@ def blinds(playersLL, small, big, pot):
     curr.data.balance -= big
     curr.data.current_bet = big
     print(f"{curr.data.name} bets Blind: ${big}")
-    pot.size += (small + big)
     return
 
 def fold(players, player):
