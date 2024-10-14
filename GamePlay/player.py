@@ -9,7 +9,7 @@ class Player:
         self.current_bet = current_bet
 
     def initialize(self):
-        return f"Player: {self.name} has ${float(self.balance)} and has the following cards: {self.hand}"
+        return f"\nPlayer: {self.name}\nBalance: ${float(self.balance)}\nHand: {self.hand}\nCurrent Bet: ${self.current_bet}"
     
     def get_name(self):
         print(self.name)

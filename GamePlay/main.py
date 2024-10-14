@@ -7,7 +7,7 @@ from pot import Pot
 from gameRules import GameRules
 from gameRules import Blinds
 from table import Table
-from linkedList import LinkedList
+from linkedList import Node, LinkedList
 import actions
 import random
 
@@ -31,7 +31,7 @@ def create_game():
                         except ValueError:
                             print("Please enter a number.")
 
-                    playersLL.insertAtEnd(Player(player_name, initial_deposit, [], 0))
+                    playersLL.insertAtEnd(Node(Player(player_name, initial_deposit, [], 0)))
                     playersLL.printLL()
             
                 case 2:
@@ -47,7 +47,7 @@ def create_game():
                     print("Invalid input")
         
         except ValueError:
-            print("That is not a valid response")
+            print("Invalid input")
 
 
 # This is the main function
@@ -66,76 +66,73 @@ def new_round(playersLL, rules):
     # Rotates players by 1
     inter = LinkedList()
     inter.head = playersLL.head.next
-    while inter.next:
-        inter = inter.next
-    inter.next = playersLL.head
-    inter.next.next = None
-
-    shiftedLL = inter.head
-    shiftedLL.printLL()
-    
-
-
-
     # Creates a new deck and shuffles it
     deck = cD.createDeck()
     random.shuffle(deck)
     # Players bet blinds
-    actions.blinds(playersT, rules.blinds.small, rules.blinds.big, pot)
+    actions.blinds(inter, rules.blinds.small, rules.blinds.big, pot)
     # New player list is made with deck of cards
-    new_players, new_deck = deal_cards(playersT, deck)
+    deal_cards(inter, deck)
     # Second card is dealt
-    deal_cards(new_players,new_deck)
+    deal_cards(inter, deck)
     # Table is created with all players playing, the pot of 0, the top bet being the blind, and all players who haven't folded
-    table = Table(new_players, pot, rules.blinds.big, new_players)
+    table = Table(inter, pot, rules.blinds.big, inter)
     # Check that prints players, balance, and hands
-    for player in table.players:
-          print(player.initialize())
-    # Determines who is "under-the-gun" and bets first
-    # if len(table.players) > 2:
-    #     utg = table.players[2]
-    # else:
-    #     utg = table.players[0]
+    print("------------------")
+    inter.printLL()
+    print("------------------")
+
+    utg = inter.head.next.next
+
+    if checkBetFold(utg, table.round_bet) == 9:
+        inter.remove(utg)
+        inter.printLL()
+    else:
+        inter.printLL()
+
+def checkBetFold(player, top_bet):
+    bool = False
+    while(not bool):
+        try:
+            print("\nPLAYER ACTION REQUIRED\n")
+            print(player.data.initialize())
+            print(f"\nTop Bet: ${top_bet}")
+            keyPress = int(input("1. Check\n2. Bet\n3. Fold "))
+            match(keyPress):
+                case 1:
+                    # Check
+                    if player.data.current_bet != top_bet:
+                        print("You can't check.")
+                    else:
+                        return
+                case 2:
+                    # Bet
+                    bet_amount = int(input("How much would you like to bet? "))
+                    if bet_amount > player.data.balance:
+                        print("You can't bet that much")
+                    else:
+                        player.data.balance -= bet_amount
+                        player.data.current_bet += bet_amount
+                        return
+                case 3:
+                    # Fold
+                    return 9
+
+
+                case _:
+                    print("Invalid input")
     
-    playerLL = LinkedList()
-
-    for player in table.players:
-        playerLL.insertAtEnd(player.name)
-
-    playerLL.printLL()
-
-
-def checkBetFold(players, top_bet):
+        except ValueError:
+            print("Invalid Input")
     return
 
-# Helps print out players and their hands
-def playersList(players):
-    list = []
-    for player in players:
-        list.append([player.name, player.balance, player.hand])
-    return list
-
 # Deals cards to players by popping from the top of the deck
-def deal_cards(players,deck):
-    playersHand = []
-    for player in players:
-        player.hand.append(deck.pop())
-        playersHand.append(Player(player.name, player.balance, player.hand, 0))
-
-    print(playersList(playersHand))
-
-    return players, deck
-
-# Cycles through the orders of the players - First goes to last, second goes to first
-def round_order(players):
-    temp = []
-    for i in range(1,len(players)):
-        temp.append(players[i])
-    temp.append(players[0])
-    return temp
-
-    
-    
+def deal_cards(playersLL, deck):
+    curr = playersLL.head
+    while curr.next != playersLL.head:
+        curr.data.hand.append(deck.pop())
+        curr = curr.next
+    return
 
 
 # This begins the output the user sees

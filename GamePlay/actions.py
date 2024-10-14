@@ -17,13 +17,15 @@ def bet(player, amount, pot):
     player.set_balance(player.balance - amount)
     return f"{player.name} bets ${amount}"
 
-def blinds(players, small, big, pot):
-    players[0].balance -= small
-    players[0].current_bet = small
-    print(f" {players[0].name} bets Small Blind: ${small}")
-    players[1].balance -= big
-    players[0].current_bet = big
-    print(f" {players[1].name} bets Big Blind: ${big}")
+def blinds(playersLL, small, big, pot):
+    curr = playersLL.head
+    curr.data.balance -= small
+    curr.data.current_bet = small
+    print(f"{curr.data.name} bets Blind: ${small}")
+    curr = curr.next
+    curr.data.balance -= big
+    curr.data.current_bet = big
+    print(f"{curr.data.name} bets Blind: ${big}")
     pot.size += (small + big)
     return
 
