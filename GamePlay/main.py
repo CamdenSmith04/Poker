@@ -119,17 +119,60 @@ def new_round(playersLL, rules):
 
     if pTurn == pTurn.next:
         pTurn.data.balance += pot.size
+        pot.size = 0
         # New Round functions
 
     inter.printLL()
-
-
 
     print(f"\nPot: ${table.pot.size}\n")
 
     flop(table, deck)
     print(f"Flop: {table.cards}")
+
+    # For turn
+    p1Turn = inter.head
+
+    # -------------- # -------------- # -------------- # -------------- # -------------- #
+    # | Add functionality to count for first person being able to make an action       | #
+    # -------------- # -------------- # -------------- # -------------- # -------------- #
+    while (p1Turn != inter.head):
+        x = checkBetFoldCall(p1Turn, table)
+        if x == 9:
+            inter.remove(p1Turn)
+            p1Turn = p1Turn.next
+        elif x == 7:
+            inter.head = p1Turn
+            p1Turn = p1Turn.next
+        elif x == 8:
+            p1Turn = p1Turn.next
+        else:
+            p1Turn = p1Turn.next
+
+    p1Turn = inter.head
+    table.pot.size += p1Turn.data.current_bet
+    p1Turn.data.current_bet = 0
+    p1Turn = pTurn.next
+    while (p1Turn != inter.head):
+        table.pot.size += p1Turn.data.current_bet
+        p1Turn.data.current_bet = 0
+        p1Turn = p1Turn.next
+    
+
+    if p1Turn == p1Turn.next:
+        p1Turn.data.balance += pot.size
+        pot.size = 0
+
+    inter.printLL()
+
+    print(f"\nPot: ${table.pot.size}\n")
+
+    add_card(table, deck)
+    print(f"Flop: {table.cards}")
+
+
+    
     return rotatedLL
+    # For river
 
 def checkBetFoldCall(player, table):
 
@@ -190,10 +233,15 @@ def deal_cards(playersLL, deck):
     return
 
 def flop(table, deck):
+    deck.pop()
     for i in range(3):
         table.cards.append(deck.pop())
     return
 
+def add_card(table, deck):
+    deck.pop()
+    table.cards.append(deck.pop())
+    return
 
 # This begins the output the user sees
 print("Welcome to Poker Simulator!")
