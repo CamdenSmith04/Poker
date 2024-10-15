@@ -23,13 +23,6 @@ class Player:
         print(f"{self.hand}")
         return self.hand
     
-    # def get_round_bet(self):
-    #     print(f"{self.round_bet}")
-    #     return self.round_bet
-    
-    # def get_action(self):
-    #     print(f"{self.action}")
-    #     return self.action
     def get_current_bet(self):
         print(f"{self.current_bet}")
         return self.current_bet
@@ -45,14 +38,6 @@ class Player:
     def set_hand(self, new_hand):
         self.hand = new_hand
         return
-    
-    # def set_round_bets(self, new_round_bet):
-    #     self.round_bet = new_round_bet
-    #     return
-    
-    # def set_action(self, new_action):
-    #     self.action = new_action
-    #     return
 
     def set_current_bet(self, new_bet):
         self.current_bet = new_bet
