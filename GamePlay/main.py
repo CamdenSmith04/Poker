@@ -92,28 +92,22 @@ def new_round(playersLL, rules):
 
     # PRE-FLOP BETTING
     #----------------------------------------//->
-    # Head is the biggest bet (big blind)
-    inter.head = inter.head.next
-
-    # Next players turn - after big blind
-    pTurn = inter.head.next
-
-    checkBets(pTurn, inter, table)
-
-    # Allows big blind to bet if checked through
+    pTurn = inter.head.next.next
+    output = checkBets(pTurn, inter, table)
+    if output == 1:
+        inter.head = pTurn
+        pTurn = inter.head.next.next
+        checkBets(pTurn, inter, table)
     if table.round_bet == rules.blinds.big:
-        x = checkBetFoldCall(pTurn, table)
+        x = checkBetFoldCall(pTurn.prev, table)
         if x == 7:
             inter.head = pTurn
             pTurn = pTurn.next
             checkBets(pTurn, inter,table)
         else:
             pTurn = pTurn.next
-    # Adds pot size and clears bets
     clearBets(pTurn, inter, table)
-
     checkFolds(pTurn, pot)
-
     table.round_bet = 0
     #----------------------------------------//->
 
@@ -127,26 +121,12 @@ def new_round(playersLL, rules):
 
     # FLOP BETTING
     #----------------------------------------//->
-    p1Turn = inter.head
-
-    x = checkBetFoldCall(p1Turn, table)
-    if x == 9:
-        inter.remove(p1Turn)
-        p1Turn = p1Turn.next
-    elif x == 7:
-        inter.head = p1Turn
-        p1Turn = p1Turn.next
-    elif x == 8:
-        p1Turn = p1Turn.next
-    else:
-        p1Turn = p1Turn.next
     
-    
-    checkBets(p1Turn, inter, table)
+    post_flop_betting(pTurn, inter, table)
 
     clearBets(pTurn, inter, table)
 
-    checkFolds(p1Turn, pot)
+    checkFolds(pTurn, pot)
 
     table.round_bet = 0
     #----------------------------------------//->
@@ -229,13 +209,28 @@ def new_round(playersLL, rules):
     return inter
 
 
+def post_flop_betting(p1Turn, inter, table):
+    p1Turn = inter.head
+    x = checkBetFoldCall(p1Turn, table)
+    if x == 9:
+        inter.remove(p1Turn)
+        p1Turn = p1Turn.next
+    elif x == 7:
+        p1Turn = p1Turn.next
+    elif x == 8:
+        p1Turn = p1Turn.next
+    else:
+        p1Turn = p1Turn.next
+    checkBets2(p1Turn, inter, table)
+
+
 def checkFolds(players, pot):
     if players == players.next:
         players.data.balance += pot.size
         pot.size = 0
     return
 
-def checkBets(p1Turn, inter, table):
+def checkBets2(p1Turn, inter, table):
     while (p1Turn != inter.head):
         x = checkBetFoldCall(p1Turn, table)
         if x == 9:
@@ -244,6 +239,22 @@ def checkBets(p1Turn, inter, table):
         elif x == 7:
             inter.head = p1Turn
             p1Turn = p1Turn.next
+            return 1
+        elif x == 8:
+            p1Turn = p1Turn.next
+        else:
+            p1Turn = p1Turn.next
+    return
+
+def checkBets(p1Turn, inter, table):
+    while (p1Turn.prev != inter.head):
+        x = checkBetFoldCall(p1Turn, table)
+        if x == 9:
+            inter.remove(p1Turn)
+            p1Turn = p1Turn.next
+        elif x == 7:
+            p1Turn = p1Turn.next
+            return 1
         elif x == 8:
             p1Turn = p1Turn.next
         else:
