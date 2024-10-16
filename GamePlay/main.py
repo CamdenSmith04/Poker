@@ -68,14 +68,13 @@ def start_game(playersLL):
 
 # <-//-----------------------------------------------------------------//->
 
-def new_round(playersLL, rules):
+def new_round(playersLL):
     pot = Pot(0)
     deck = cD.createDeck()
     random.shuffle(deck)
     deal_cards(playersLL, deck)
     deal_cards(playersLL, deck)
     roundLL = playersLL.head
-    dealer = playersLL.head
     roundLL = roundLL.next
     roundLL.data.current_bet = SMALL_BLIND
     roundLL.data.balance -= SMALL_BLIND
@@ -95,7 +94,6 @@ def new_round(playersLL, rules):
     # PRE-FLOP BETTING
     #----------------------------------------//->
     roundLL = roundLL.next
-    count = 0
     preFlopBetting(playersLL, roundLL, table, topBet)
     clearBets(playersLL, table)
     checkFolds(playersLL, table)
@@ -103,24 +101,81 @@ def new_round(playersLL, rules):
     print("-----------------------")
     playersLL.printLL()
     print()
-    print(f"Pot: {table.pot.size}")
+    print(f"Pot: ${table.pot.size}")
     print("-----------------------")
     #----------------------------------------//->
 
+    # CREATE FLOP
+    #----------------------------------------//->
     deck.pop()
     for i in range(3):
         table.cards.append(deck.pop())
 
-    print(table.cards)
-
-
-    # POST_FLOP BETTING
-
-    # PRINT CHUNK
-    #----------------------------------------//->
-    print(f"\nPot: ${table.pot.size}\n")
-    flop(table, deck)
     print(f"Flop: {table.cards}")
+    #----------------------------------------//->
+
+    # FLOP BETTING
+    #----------------------------------------//->
+    table.topBet = 0
+    round2LL = playersLL.head
+    round2LL = round2LL.next
+    postFlopBetting(playersLL, round2LL, table)
+    clearBets(playersLL, table)
+    checkFolds(playersLL, table)
+
+    print("-----------------------")
+    playersLL.printLL()
+    print()
+    print(f"Pot: ${table.pot.size}")
+    print("-----------------------")
+    #----------------------------------------//->
+
+    # CREATE TURN
+    #----------------------------------------//->
+    deck.pop()
+    table.cards.append(deck.pop())
+
+    print(f"Turn: {table.cards}")
+    #----------------------------------------//->
+
+    # TURN BETTING
+    #----------------------------------------//->
+    table.topBet = 0
+    round3LL = playersLL.head
+    round3LL = round3LL.next
+    postFlopBetting(playersLL, round3LL, table)
+    clearBets(playersLL, table)
+    checkFolds(playersLL, table)
+
+    print("-----------------------")
+    playersLL.printLL()
+    print()
+    print(f"Pot: ${table.pot.size}")
+    print("-----------------------")
+    #----------------------------------------//->
+
+    # CREATE RIVER
+    #----------------------------------------//->
+    deck.pop()
+    table.cards.append(deck.pop())
+
+    print(f"River: {table.cards}")
+    #----------------------------------------//->
+
+    # RIVER BETTING
+    #----------------------------------------//->
+    table.topBet = 0
+    round4LL = playersLL.head
+    round4LL = round4LL.next
+    postFlopBetting(playersLL, round4LL, table)
+    clearBets(playersLL, table)
+    checkFolds(playersLL, table)
+
+    print("-----------------------")
+    playersLL.printLL()
+    print()
+    print(f"Pot: ${table.pot.size}")
+    print("-----------------------")
     #----------------------------------------//->
 
     return inter
@@ -134,6 +189,22 @@ def preFlopBetting(players, player, table, topBet):
         if checkBetFoldCall(player, table) == 7:
             player = player.next
             preFlopBetting(players, player, table, topBet)
+
+
+def postFlopBetting(players, player, table):
+    if checkBetFoldCall(player, table) == 7:
+        player = player.next
+        while player.data.current_bet != table.topBet:
+            if checkBetFoldCall(player, table) == 9:
+                players.remove(player)
+            player = player.next
+    else:
+        player = player.next
+        while player.prev != players.head:
+            preFlopBetting(players, player, table, table.topBet)
+            player=player.next
+    
+            
 
 def checkFolds(players, table):
     player = players.head
