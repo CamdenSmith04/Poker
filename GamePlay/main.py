@@ -11,6 +11,9 @@ from linkedList import Node, LinkedList
 import actions
 import random
 
+SMALL_BLIND = 25
+BIG_BLIND = 50
+
 # This enables the game functions to be created
 def create_game():
     playersLL = LinkedList()
@@ -66,210 +69,88 @@ def start_game(playersLL):
 # <-//-----------------------------------------------------------------//->
 
 def new_round(playersLL, rules):
-    # Sets pot size to 0
     pot = Pot(0)
-    # Rotates players by 1
-    rotatedLL = LinkedList()
-    rotatedLL.head = playersLL.head.next
-    # Creates the list that will track folds
-    inter = LinkedList()
-    inter.head = rotatedLL.head
-    # Creates a new deck and shuffles it
     deck = cD.createDeck()
     random.shuffle(deck)
-    # Players bet blinds
-    actions.blinds(inter, rules.blinds.small, rules.blinds.big, pot)
-    # New player list is made with deck of cards
-    deal_cards(inter, deck)
-    # Second card is dealt
-    deal_cards(inter, deck)
-    # Table is created with all players playing, the pot of 0, the top bet being the blind, and all players who haven't folded
-    table = Table(inter, pot, rules.blinds.big, inter, [])
-    # Check that prints players, balance, and hands
+    deal_cards(playersLL, deck)
+    deal_cards(playersLL, deck)
+    roundLL = playersLL.head
+    dealer = playersLL.head
+    roundLL = roundLL.next
+    roundLL.data.current_bet = SMALL_BLIND
+    roundLL.data.balance -= SMALL_BLIND
+    roundLL = roundLL.next
+    roundLL.data.current_bet = BIG_BLIND
+    roundLL.data.balance -= BIG_BLIND
+    topBet = BIG_BLIND
+
+    table = Table(pot, topBet, [])
+
+    print(roundLL.data.initialize())
+
     print("------------------")
-    inter.printLL()
+    playersLL.printLL()
     print("------------------")
 
     # PRE-FLOP BETTING
     #----------------------------------------//->
-    pTurn = inter.head.next.next
-    output = checkBets(pTurn, inter, table)
-    if output == 1:
-        inter.head = pTurn
-        pTurn = inter.head.next.next
-        checkBets(pTurn, inter, table)
-    if table.round_bet == rules.blinds.big:
-        x = checkBetFoldCall(pTurn.prev, table)
-        if x == 7:
-            inter.head = pTurn
-            pTurn = pTurn.next
-            checkBets(pTurn, inter,table)
-        else:
-            pTurn = pTurn.next
-    clearBets(pTurn, inter, table)
-    checkFolds(pTurn, pot)
-    table.round_bet = 0
+    roundLL = roundLL.next
+    count = 0
+    preFlopBetting(playersLL, roundLL, table, topBet)
+    clearBets(playersLL, table)
+    checkFolds(playersLL, table)
+
+    print("-----------------------")
+    playersLL.printLL()
+    print()
+    print(f"Pot: {table.pot.size}")
+    print("-----------------------")
     #----------------------------------------//->
+
+    deck.pop()
+    for i in range(3):
+        table.cards.append(deck.pop())
+
+    print(table.cards)
+
+
+    # POST_FLOP BETTING
 
     # PRINT CHUNK
     #----------------------------------------//->
-    inter.printLL()
     print(f"\nPot: ${table.pot.size}\n")
     flop(table, deck)
     print(f"Flop: {table.cards}")
     #----------------------------------------//->
 
-    # FLOP BETTING
-    #----------------------------------------//->
-    
-    post_flop_betting(pTurn, inter, table)
-
-    clearBets(pTurn, inter, table)
-
-    checkFolds(pTurn, pot)
-
-    table.round_bet = 0
-    #----------------------------------------//->
-
-    # PRINT CHUNK
-    #----------------------------------------//->
-    inter.printLL()
-    print(f"\nPot: ${table.pot.size}\n")
-    add_card(table, deck)
-    print(f"Flop: {table.cards}")
-    #----------------------------------------//->
-
-    # TURN BETTING
-    #----------------------------------------//->
-    p1Turn = inter.head
-
-    x = checkBetFoldCall(p1Turn, table)
-    if x == 9:
-        inter.remove(p1Turn)
-        p1Turn = p1Turn.next
-    elif x == 7:
-        inter.head = p1Turn
-        p1Turn = p1Turn.next
-    elif x == 8:
-        p1Turn = p1Turn.next
-    else:
-        p1Turn = p1Turn.next
-    
-    
-    checkBets(p1Turn, inter, table)
-
-    clearBets(pTurn, inter, table)
-
-    checkFolds(p1Turn, pot)
-
-    table.round_bet = 0
-    #----------------------------------------//->
-
-    # PRINT CHUNK
-    #----------------------------------------//->
-    inter.printLL()
-    print(f"\nPot: ${table.pot.size}\n")
-    add_card(table, deck)
-    print(f"Flop: {table.cards}")
-    #----------------------------------------//->
-
-    # RIVER BETTING
-    #----------------------------------------//->
-    p1Turn = inter.head
-
-    x = checkBetFoldCall(p1Turn, table)
-    if x == 9:
-        inter.remove(p1Turn)
-        p1Turn = p1Turn.next
-    elif x == 7:
-        inter.head = p1Turn
-        p1Turn = p1Turn.next
-    elif x == 8:
-        p1Turn = p1Turn.next
-    else:
-        p1Turn = p1Turn.next
-    
-    
-    checkBets(p1Turn, inter, table)
-
-    clearBets(pTurn, inter, table)
-
-    checkFolds(p1Turn, pot)
-
-    table.round_bet = 0
-    #----------------------------------------//->
-
-    # PRINT CHUNK
-    #----------------------------------------//->
-    inter.printLL()
-    print(f"\nPot: ${table.pot.size}\n")
-    print(f"Flop: {table.cards}")
-    #----------------------------------------//->
-
     return inter
 
+def preFlopBetting(players, player, table, topBet):
+    while player.data.current_bet != table.topBet:
+        if checkBetFoldCall(player, table) == 9:
+            players.remove(player)
+        player = player.next
+    if player.data.current_bet == table.topBet and table.topBet == topBet:
+        if checkBetFoldCall(player, table) == 7:
+            player = player.next
+            preFlopBetting(players, player, table, topBet)
 
-def post_flop_betting(p1Turn, inter, table):
-    p1Turn = inter.head
-    x = checkBetFoldCall(p1Turn, table)
-    if x == 9:
-        inter.remove(p1Turn)
-        p1Turn = p1Turn.next
-    elif x == 7:
-        p1Turn = p1Turn.next
-    elif x == 8:
-        p1Turn = p1Turn.next
-    else:
-        p1Turn = p1Turn.next
-    checkBets2(p1Turn, inter, table)
-
-
-def checkFolds(players, pot):
-    if players == players.next:
-        players.data.balance += pot.size
-        pot.size = 0
+def checkFolds(players, table):
+    player = players.head
+    if player == player.next:
+        player.data.balance += table.pot.size
+        table.pot.size = 0
     return
 
-def checkBets2(p1Turn, inter, table):
-    while (p1Turn != inter.head):
-        x = checkBetFoldCall(p1Turn, table)
-        if x == 9:
-            inter.remove(p1Turn)
-            p1Turn = p1Turn.next
-        elif x == 7:
-            inter.head = p1Turn
-            p1Turn = p1Turn.next
-            return 1
-        elif x == 8:
-            p1Turn = p1Turn.next
-        else:
-            p1Turn = p1Turn.next
-    return
-
-def checkBets(p1Turn, inter, table):
-    while (p1Turn.prev != inter.head):
-        x = checkBetFoldCall(p1Turn, table)
-        if x == 9:
-            inter.remove(p1Turn)
-            p1Turn = p1Turn.next
-        elif x == 7:
-            p1Turn = p1Turn.next
-            return 1
-        elif x == 8:
-            p1Turn = p1Turn.next
-        else:
-            p1Turn = p1Turn.next
-    return
-
-def clearBets(pTurn, inter, table):
-    pTurn = inter.head
-    table.pot.size += pTurn.data.current_bet
-    pTurn.data.current_bet = 0
-    pTurn = pTurn.next
-    while (pTurn != inter.head):
-        table.pot.size += pTurn.data.current_bet
-        pTurn.data.current_bet = 0
-        pTurn = pTurn.next
+def clearBets(players, table):
+    player = players.head
+    table.pot.size += player.data.current_bet
+    player.data.current_bet = 0
+    player = player.next
+    while (player != players.head):
+        table.pot.size += player.data.current_bet
+        player.data.current_bet = 0
+        player = player.next
     return
 
 def checkBetFoldCall(player, table):
@@ -279,12 +160,12 @@ def checkBetFoldCall(player, table):
         try:
             print("\nPLAYER ACTION REQUIRED")
             print(player.data.initialize())
-            print(f"\nTop Bet: ${table.round_bet}")
+            print(f"\nTop Bet: ${table.topBet}")
             keyPress = int(input("1. Check\n2. Bet\n3. Call\n4. Fold"))
             match(keyPress):
                 case 1:
                     # Check
-                    if player.data.current_bet != table.round_bet:
+                    if player.data.current_bet != table.topBet:
                         print("\nERROR: You can't check.")
                     else:
                         return
@@ -293,20 +174,21 @@ def checkBetFoldCall(player, table):
                     bet_amount = int(input("How much would you like to bet? "))
                     if bet_amount > player.data.balance:
                         print("\nERROR: You can't bet that much")
+                    elif bet_amount < player.data.current_bet + table.topBet:
+                        print("\nERROR: You must bet more than the current highest bet.")
                     else:
                         player.data.balance -= bet_amount
                         player.data.current_bet += bet_amount
-                        table.round_bet = player.data.current_bet
-                        
+                        table.topBet = player.data.current_bet
                         return 7
                     
                 case 3:
                     # Call
-                    if player.data.current_bet == table.round_bet:
+                    if player.data.current_bet == table.topBet:
                         print("\nERROR: You are bidding the current bid, please check.")
                     else:
-                        player.data.balance -= (table.round_bet - player.data.current_bet)
-                        player.data.current_bet = table.round_bet
+                        player.data.balance -= (table.topBet - player.data.current_bet)
+                        player.data.current_bet = table.topBet
                         return 8
 
                 case 4:
@@ -324,19 +206,13 @@ def checkBetFoldCall(player, table):
     return
 
 # Deals cards to players by popping from the top of the deck
-def deal_cards(playersLL, deck):
-    curr = playersLL.head
+def deal_cards(LL, deck):
+    curr = LL.head
     curr.data.hand.append(deck.pop())
     curr = curr.next
-    while curr != playersLL.head:
+    while curr != LL.head:
         curr.data.hand.append(deck.pop())
         curr = curr.next
-    return
-
-def flop(table, deck):
-    deck.pop()
-    for i in range(3):
-        table.cards.append(deck.pop())
     return
 
 def add_card(table, deck):
