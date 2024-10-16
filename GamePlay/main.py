@@ -56,7 +56,7 @@ def create_game():
 # This is the main function
 # <-//----------------------------------------------------------------//-->
 def start_game(playersLL):
-    new_round(playersLL, GameRules(blinds=Blinds(25,50))) # returns inter
+    new_round(playersLL) # returns inter
 
     # Go through inter to get each rank
     # Compare ranks
