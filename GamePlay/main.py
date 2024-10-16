@@ -2,13 +2,12 @@ import sys
 sys.path.insert(1, "Poker")
 
 import BestHand.createDeck as cD
+import BestHand.bestHand as bH
+import BestHand.decodeHand as decode
 from player import Player
 from pot import Pot
-from gameRules import GameRules
-from gameRules import Blinds
 from table import Table
 from linkedList import Node, LinkedList
-import actions
 import random
 
 SMALL_BLIND = 25
@@ -178,7 +177,136 @@ def new_round(playersLL):
     print("-----------------------")
     #----------------------------------------//->
 
+    handRank(playersLL, table)
+    
+
+
+
     return inter
+
+def handRank(players, table):
+    player = players.head
+    allCards = []
+    allCards.append(player.data.hand[0])
+    allCards.append(player.data.hand[1])
+    for i in range(len(table.cards)):
+        allCards.append(table.cards[i])
+    player.data.hand = []
+    player.data.hand.append(bH.best_hand(decode.decode(allCards))[0])
+    print(player.data.hand)
+    player = player.next
+    while player != players.head:
+        allCards = []
+        allCards.append(player.data.hand[0])
+        allCards.append(player.data.hand[1])
+        for i in range(len(table.cards)):
+            allCards.append(table.cards[i])
+        player.data.hand = []
+        player.data.hand.append(bH.best_hand(decode.decode(allCards))[0])
+        print(player.data.hand)
+        player = player.next
+
+def determineWinner(players):
+    player = players
+    top_rank = player.data.hand[-1]
+    top_hand = []
+    curr_hand = []
+    player_count = 1
+    for i in range(5):
+        top_hand.append(player.data.hand[i][0])
+    player = player.next
+    while player != players.head:
+        if player.data.hand[-1] < top_rank:
+            players.remove(player.prev)
+            top_rank = player.data.hand[-1]
+        elif players.data.hand[-1] == top_rank:
+            for i in range(5):
+                curr_hand.append(player.data.hand[i][0])
+
+                if top_rank == 1:
+                    player_count += 1
+
+                elif top_rank == 2 or top_rank == 6:
+                    if player.data.hand[0][0] > player.prev.data.hand[0][0]:
+                        players.remove(player.prev)
+                    elif player.data.hand[0][0] == player.prev.data.hand[0][0]:
+                        player_count += 1
+                    else:
+                        players.remove(player)
+
+                elif top_rank == 3:
+                    if player.data.hand[1][0] > player.prev.data.hand[1][0]:
+                        players.remove(player.prev)
+                    elif player.data.hand[1][0] == player.prev.data.hand[1][0]:
+                        player_count += 1
+                    else:
+                        players.remove(player)
+
+                elif top_rank == 4 or top_rank == 7:
+                    if player.data.hand[2][0] > player.prev.data.hand[2][0]:
+                        players.remove(player.prev)
+                    else:
+                        players.remove(player)
+
+                elif top_rank == 5:
+                    i = 4
+                    while i > -1:
+                        if player.data.hand[i][0] > player.prev.data.hand[i][0]:
+                            players.remove(player.prev)
+                        elif player.data.hand[i][0] < player.prev.data.hand[i][0]:
+                            players.remove(player)
+                        else:
+                            i -= 1
+
+                elif top_rank == 8:
+                    if player.data.hand[3][0] > player.prev.data.hand[3][0]:
+                        players.remove(player.prev)
+                    elif player.data.hand[3][0] == player.prev.data.hand[3][0]:
+                        if player.data.hand[1][0] > player.prev.data.hand[1][0]:
+                            players.remove(player.prev)
+                        elif player.data.hand[1][0] == player.prev.data.hand[1][0]:
+                            player1_card = 0
+                            player2_card = 0
+                            if player.prev.data.hand[0] == player.prev.data.hand[1] and player.prev.data.hand[3] == player.prev.data.hand[4]:
+                                player1_card = player.prev.data.hand[2]
+                            elif player.prev.data.hand[1] == player.prev.data.hand[2] and player.prev.data.hand[3] == player.prev.data.hand[4]:
+                                player1_card = player.prev.data.hand[0]
+                            else:
+                                player1_card = player.prev.data.hand[4]
+
+                            if player.data.hand[0] == player.data.hand[1] and player.data.hand[3] == player.data.hand[4]:
+                                player2_card = player.data.hand[2]
+                            elif player.data.hand[1] == player.data.hand[2] and player.data.hand[3] == player.data.hand[4]:
+                                player2_card = player.data.hand[0]
+                            else:
+                                player2_card = player.data.hand[4]
+
+                            if player1_card > player2_card:
+                                players.remove(player)
+                            elif player1_card == player2_card:
+                                player_count += 1
+                            else:
+                                players.remove(player.prev)
+                        else:
+                            players.remove(player)
+                    else:
+                        players.remove(player)
+                elif top_rank == 9:
+                    
+                else:
+                    i = 4
+                    while i > -1:
+                        if player.data.hand[i][0] > player.prev.data.hand[i][0]:
+                            players.remove(player.prev)
+                        elif player.data.hand[i][0] < player.prev.data.hand[i][0]:
+                            players.remove(player)
+                        else:
+                            i -= 1
+
+        else:
+            players.remove(player)
+        player = player.next
+
 
 def preFlopBetting(players, player, table, topBet):
     while player.data.current_bet != table.topBet:

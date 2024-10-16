@@ -1,7 +1,10 @@
+import sys
+sys.path.insert(1, "Poker")
+
+import BestHand.rankHand as rankHand
+import BestHand.createDeck as createDeck
+import BestHand.decodeHand as decodeHand
 import random
-import rankHand as rankHand
-import createDeck as createDeck
-import decodeHand as decodeHand
 
 def best_hand(cards_in_play):
 
@@ -18,8 +21,8 @@ def best_hand(cards_in_play):
             removeTwo = removeOne[:]
             removeTwo.pop(j)
             # Gives each hand a rank so they can be sorted later
-            removeTwo.append(rank(removeTwo))
             possibleHands.append(removeTwo)
+            removeTwo.append(rank(removeTwo))
 
     # Sorts the hands by the rank - which is assigned as the last index (highest rank reported first)
     possibleHands.sort(key=lambda x: int(x[-1]))

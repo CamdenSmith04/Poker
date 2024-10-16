@@ -23,11 +23,8 @@ def flush(hand):
 
 # Rank 6
 def straight(hand):
-    if hand[-1][0] == 14 and hand[-2][0] != 14 and hand[-2][0] != 13 and hand[0][0] == 2:
-        new_hand = hand[:]
-        new_hand[-1][0] = 1
-        new_hand.sort(key=lambda x: x[0])
-        return straight(new_hand)
+    if hand[4][0] == 14 and hand[0][0] == 2 and hand[1][0] == 3 and hand[2][0] == 4 and hand[3][0] == 5:
+        return True
     else:
         for i in range(len(hand)-1):
             if hand[i][0] + 1 != hand[i+1][0]:
