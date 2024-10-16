@@ -177,12 +177,12 @@ def new_round(playersLL):
     print("-----------------------")
     #----------------------------------------//->
 
-    handRank(playersLL, table)
+    determineWinner(handRank(playersLL, table), pot)
     
+    playersLL.printLL()
 
 
-
-    return inter
+    return playersLL
 
 def handRank(players, table):
     player = players.head
@@ -205,30 +205,26 @@ def handRank(players, table):
         player.data.hand.append(bH.best_hand(decode.decode(allCards))[0])
         print(player.data.hand)
         player = player.next
+    return players
 
-def determineWinner(players):
-    player = players
+def determineWinner(players, pot):
+    player = players.head
     top_rank = player.data.hand[-1]
-    top_hand = []
-    curr_hand = []
+    print(top_rank)
     player_count = 1
-    for i in range(5):
-        top_hand.append(player.data.hand[i][0])
     player = player.next
     while player != players.head:
         if player.data.hand[-1] < top_rank:
-            players.remove(player.prev)
             top_rank = player.data.hand[-1]
-        elif players.data.hand[-1] == top_rank:
-            for i in range(5):
-                curr_hand.append(player.data.hand[i][0])
-
+            player_count = removes(players, player, player_count)
+            print("1 removed")
+        elif player.data.hand[-1] == top_rank:
                 if top_rank == 1:
                     player_count += 1
 
                 elif top_rank == 2 or top_rank == 6:
                     if player.data.hand[0][0] > player.prev.data.hand[0][0]:
-                        players.remove(player.prev)
+                        player_count = removes(players, player, player_count)
                     elif player.data.hand[0][0] == player.prev.data.hand[0][0]:
                         player_count += 1
                     else:
@@ -236,7 +232,7 @@ def determineWinner(players):
 
                 elif top_rank == 3:
                     if player.data.hand[1][0] > player.prev.data.hand[1][0]:
-                        players.remove(player.prev)
+                        player_count = removes(players, player, player_count)
                     elif player.data.hand[1][0] == player.prev.data.hand[1][0]:
                         player_count += 1
                     else:
@@ -244,7 +240,7 @@ def determineWinner(players):
 
                 elif top_rank == 4 or top_rank == 7:
                     if player.data.hand[2][0] > player.prev.data.hand[2][0]:
-                        players.remove(player.prev)
+                        player_count = removes(players, player, player_count)
                     else:
                         players.remove(player)
 
@@ -252,7 +248,7 @@ def determineWinner(players):
                     i = 4
                     while i > -1:
                         if player.data.hand[i][0] > player.prev.data.hand[i][0]:
-                            players.remove(player.prev)
+                            player_count = removes(players, player, player_count)
                         elif player.data.hand[i][0] < player.prev.data.hand[i][0]:
                             players.remove(player)
                         else:
@@ -260,53 +256,115 @@ def determineWinner(players):
 
                 elif top_rank == 8:
                     if player.data.hand[3][0] > player.prev.data.hand[3][0]:
-                        players.remove(player.prev)
+                        player_count = removes(players, player, player_count)
                     elif player.data.hand[3][0] == player.prev.data.hand[3][0]:
                         if player.data.hand[1][0] > player.prev.data.hand[1][0]:
-                            players.remove(player.prev)
+                            player_count = removes(players, player, player_count)
                         elif player.data.hand[1][0] == player.prev.data.hand[1][0]:
                             player1_card = 0
                             player2_card = 0
-                            if player.prev.data.hand[0] == player.prev.data.hand[1] and player.prev.data.hand[3] == player.prev.data.hand[4]:
+                            if player.prev.data.hand[0][0] == player.prev.data.hand[1][0] and player.prev.data.hand[3][0] == player.prev.data.hand[4][0]:
                                 player1_card = player.prev.data.hand[2]
-                            elif player.prev.data.hand[1] == player.prev.data.hand[2] and player.prev.data.hand[3] == player.prev.data.hand[4]:
-                                player1_card = player.prev.data.hand[0]
+                            elif player.prev.data.hand[1][0] == player.prev.data.hand[2][0] and player.prev.data.hand[3][0] == player.prev.data.hand[4][0]:
+                                player1_card = player.prev.data.hand[0][0]
                             else:
-                                player1_card = player.prev.data.hand[4]
+                                player1_card = player.prev.data.hand[4][0]
 
-                            if player.data.hand[0] == player.data.hand[1] and player.data.hand[3] == player.data.hand[4]:
-                                player2_card = player.data.hand[2]
-                            elif player.data.hand[1] == player.data.hand[2] and player.data.hand[3] == player.data.hand[4]:
+                            if player.data.hand[0][0] == player.data.hand[1][0] and player.data.hand[3][0] == player.data.hand[4][0]:
+                                player2_card = player.data.hand[2][0]
+                            elif player.data.hand[1][0] == player.data.hand[2][0] and player.data.hand[3][0] == player.data.hand[4][0]:
                                 player2_card = player.data.hand[0]
                             else:
-                                player2_card = player.data.hand[4]
+                                player2_card = player.data.hand[4][0]
 
                             if player1_card > player2_card:
                                 players.remove(player)
                             elif player1_card == player2_card:
                                 player_count += 1
                             else:
-                                players.remove(player.prev)
+                                player_count = removes(players, player, player_count)
                         else:
                             players.remove(player)
                     else:
                         players.remove(player)
                 elif top_rank == 9:
+                    player1_cards = [] 
+                    player2_cards = []
+
+                    if player.data.hand[0][0] == player.data.hand[1][0]:
+                        player2_cards.append(player.data.hand([2][0]))
+                        player2_cards.append(player.data.hand([3][0]))
+                        player2_cards.append(player.data.hand([4][0]))
+                    elif player.data.hand[1][0] == player.data.hand[2][0]:
+                        player2_cards.append(player.data.hand([0][0]))
+                        player2_cards.append(player.data.hand([3][0]))
+                        player2_cards.append(player.data.hand([4][0]))
+                    elif player.data.hand[2][0] == player.data.hand[3][0]:
+                        player2_cards.append(player.data.hand([0][0]))
+                        player2_cards.append(player.data.hand([1][0]))
+                        player2_cards.append(player.data.hand([4][0]))
+                    else:
+                        player2_cards.append(player.data.hand([0][0]))
+                        player2_cards.append(player.data.hand([1][0]))
+                        player2_cards.append(player.data.hand([2][0]))
+
+                    if player.prev.data.hand[0][0] == player.prev.data.hand[1][0]:
+                        player1_cards.append(player.prev.data.hand([2][0]))
+                        player1_cards.append(player.prev.data.hand([3][0]))
+                        player1_cards.append(player.prev.data.hand([4][0]))
+                    elif player.prev.data.hand[1][0] == player.prev.data.hand[2][0]:
+                        player1_cards.append(player.prev.data.hand([0][0]))
+                        player1_cards.append(player.prev.data.hand([3][0]))
+                        player1_cards.append(player.prev.data.hand([4][0]))
+                    elif player.prev.data.hand[2][0] == player.prev.data.hand[3][0]:
+                        player1_cards.append(player.prev.data.hand([0][0]))
+                        player1_cards.append(player.prev.data.hand([1][0]))
+                        player1_cards.append(player.prev.data.hand([4][0]))
+                    else:
+                        player1_cards.append(player.prev.data.hand([0][0]))
+                        player1_cards.append(player.prev.data.hand([1][0]))
+                        player1_cards.append(player.prev.data.hand([2][0]))
                     
+                    if player1_cards[2] > player2_cards[2]:
+                        players.remove(player)
+                    elif player1_cards[2] == player2_cards[2]:
+                        if player1_cards[1] > player2_cards[1]:
+                            players.remove(player)
+                        elif player1_cards[1] == player2_cards[1]:
+                            if player1_cards[2] > player2_cards[2]:
+                                players.remove(player)
+                            elif player1_cards[2] == player2_cards[2]:
+                                player_count += 1
+                            else:
+                                player_count = removes(players, player, player_count)
+                        else:
+                            player_count = removes(players, player, player_count)
+                    else:
+                        player_count = removes(players, player, player_count)
+
                 else:
                     i = 4
                     while i > -1:
                         if player.data.hand[i][0] > player.prev.data.hand[i][0]:
-                            players.remove(player.prev)
+                            player_count = removes(players, player, player_count)
+                            i -= 1
                         elif player.data.hand[i][0] < player.prev.data.hand[i][0]:
                             players.remove(player)
+                            i -= 1
                         else:
                             i -= 1
 
         else:
             players.remove(player)
         player = player.next
+    player.data.balance += pot.size
+    return
 
+def removes(players, player, count):
+    print("Removed")
+    for _ in range(count):
+        players.remove(player.prev)
+    return 1
 
 def preFlopBetting(players, player, table, topBet):
     while player.data.current_bet != table.topBet:
@@ -317,6 +375,9 @@ def preFlopBetting(players, player, table, topBet):
         if checkBetFoldCall(player, table) == 7:
             player = player.next
             preFlopBetting(players, player, table, topBet)
+        elif checkBetFoldCall(player, table) == 9:
+            players.remove(player)
+            player = player.next
 
 
 def postFlopBetting(players, player, table):
