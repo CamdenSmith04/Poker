@@ -185,6 +185,9 @@ def new_round(playersLL):
     return playersLL
 
 def handRank(players, table):
+    print("-----------------------")
+    print("Each players' Best Hand")
+    print("-----------------------")
     player = players.head
     allCards = []
     allCards.append(player.data.hand[0])
@@ -209,15 +212,18 @@ def handRank(players, table):
 
 def determineWinner(players, pot):
     player = players.head
-    top_rank = player.data.hand[-1]
-    print(top_rank)
+    player.data.hand[-1][-1]
+    top_rank = player.data.hand[-1][-1]
+    print()
+    print("-----------------------")
+    print("Winner")
+    print("-----------------------")
     player_count = 1
     player = player.next
     while player != players.head:
-        if player.data.hand[-1] < top_rank:
-            top_rank = player.data.hand[-1]
+        if player.data.hand[-1][-1] < top_rank:
+            top_rank = player.data.hand[-1][-1]
             player_count = removes(players, player, player_count)
-            print("1 removed")
         elif player.data.hand[-1] == top_rank:
                 if top_rank == 1:
                     player_count += 1
@@ -361,7 +367,6 @@ def determineWinner(players, pot):
     return
 
 def removes(players, player, count):
-    print("Removed")
     for _ in range(count):
         players.remove(player.prev)
     return 1
@@ -378,7 +383,6 @@ def preFlopBetting(players, player, table, topBet):
         elif checkBetFoldCall(player, table) == 9:
             players.remove(player)
             player = player.next
-
 
 def postFlopBetting(players, player, table):
     if checkBetFoldCall(player, table) == 7:

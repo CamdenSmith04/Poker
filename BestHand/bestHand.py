@@ -50,17 +50,6 @@ def rank(hand):
         return 9
     else:
         return 10
-    
 
-# Random cards a player is dealt
-deck = createDeck.createDeck()
-random.shuffle(deck)
-hands = deck[0:7]
-hands = decodeHand.decode(hands)
-
-print("\n", hands, "\n")
-
-for i in range(len(best_hand(hands))):
-    print(best_hand(hands)[i])
 
 
