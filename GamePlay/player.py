@@ -4,8 +4,6 @@ class Player:
         self.name = name
         self.balance = balance
         self.hand = hand
-        # self.round_bet = round_bet
-        # self.action = action
         self.current_bet = current_bet
 
     def initialize(self):

@@ -465,6 +465,7 @@ def postFlopBetting(players, player, table):
                 player = player.next
             else:
                 player = player.next
+
         decision = checkBetFoldCall(player,table)
         if decision == 7:
             player = player.next
@@ -485,6 +486,7 @@ def postFlopBetting(players, player, table):
                 player = player.next
             else:
                 player = player.next
+        return
     
 def checkFolds(players, table):
     player = players.head
