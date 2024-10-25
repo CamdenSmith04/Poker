@@ -56,6 +56,16 @@ class LinkedList:
             if self.head == node:
                 self.head = node.next
 
+    def removePost(self, node):
+        if self.head.next == self.head:
+            self.head = None
+        else:
+            node.prev.next = node.next
+            node.next.prev = node.prev
+            if self.head == node:
+                self.head = node.prev
+
+
     def printLL(self):
         if self.head is None:
             return
