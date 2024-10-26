@@ -1,2 +1,2 @@
 # Poker
-A Poker Project from Scratch
+A Poker project built from scratch
