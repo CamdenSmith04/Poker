@@ -4,7 +4,6 @@ sys.path.insert(1, "Poker")
 import BestHand.rankHand as rankHand
 import BestHand.createDeck as createDeck
 import BestHand.decodeHand as decodeHand
-import random
 
 def best_hand(cards_in_play):
 

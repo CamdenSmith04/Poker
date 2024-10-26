@@ -43,14 +43,13 @@ def create_game():
 
                 case 3:
                     bool = True
-                    return
+                    break
 
                 case _:
                     print("Invalid input")
         
         except ValueError:
             print("Invalid input")
-
 
 # This is the main function
 # <-//----------------------------------------------------------------//-->
@@ -64,9 +63,8 @@ def start_game(playersLL):
     # Give winner pot, reset game, run again
 
     # If all folds already end game and new game, return inter escape
-
 # <-//-----------------------------------------------------------------//->
-
+    
 def new_round(playersLL):
     pot = Pot(0)
     deck = cD.createDeck()
@@ -460,6 +458,7 @@ def postFlopBetting(players, player, table):
             if decision == 7:
                 player = player.next
                 postFlopBetting(players, player, table)
+                return
             elif decision == 9:
                 players.removePost(player)
                 player = player.next
@@ -470,6 +469,7 @@ def postFlopBetting(players, player, table):
         if decision == 7:
             player = player.next
             postFlopBetting(players, player, table)
+            return
         elif decision == 9:
             players.removePost(player)
             player = player.next
@@ -481,6 +481,7 @@ def postFlopBetting(players, player, table):
             if decision == 7:
                 player = player.next
                 postFlopBetting(players, player, table)
+                return
             elif decision == 9:
                 players.removePost(player)
                 player = player.next
@@ -527,7 +528,7 @@ def checkBetFoldCall(player, table):
                     bet_amount = int(input("How much would you like to bet? "))
                     if bet_amount > player.data.balance:
                         print("\nERROR: You can't bet that much")
-                    elif bet_amount < player.data.current_bet + table.topBet:
+                    elif bet_amount <= table.topBet - player.data.current_bet:
                         print("\nERROR: You must bet more than the current highest bet.")
                     else:
                         player.data.balance -= bet_amount
@@ -588,5 +589,3 @@ while(not bool):
             break
         case _:
             print("Invalid input")
-            
-
